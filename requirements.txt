@@ -11,5 +11,4 @@ optuna
 xgboost
 joblib
 mlflow
-skmultiflow
 river

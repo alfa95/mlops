@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
-from river.drift import ADWIN  # ✅ Replaced skmultiflow with river
+from river.drift import ADWIN
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
