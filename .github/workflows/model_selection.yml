@@ -1,10 +1,12 @@
-name: Feature Engineering Pipeline
+name: Model Selection Pipeline
 
 on:
-  workflow_dispatch:  # Allow manual trigger only
+  push:
+    branches:
+      - main  # Runs feature engineering on any push to main
 
 jobs:
-  run-feature-engineering:
+  run-model-selection:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,21 +31,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download EDA Report (Optional)
-        continue-on-error: true  # Allow pipeline to continue if EDA report is missing
-        uses: actions/download-artifact@v4
-        with:
-          name: eda-report
-          path: eda_reports/
+      - name: Run Model Selection
+        run: python scripts/model_selection.py
 
-      - name: Run Feature Engineering
-        run: python scripts/feature_engineering.py
-
-      - name: Upload Processed Data & Model as Artifacts
+      - name: Upload Trained Model
         uses: actions/upload-artifact@v4
         with:
-          name: processed-data-and-model
-          path: |
-            models/
-            processed_data/
-          if-no-files-found: error  # Fail if no files are found
+          name: trained-model
+          path: models/final_xgb_model.pkl
+          if-no-files-found: error  # Fail if model is missing
