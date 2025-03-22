@@ -1,0 +1,36 @@
+name: Auto EDA Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-eda:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run EDA Script
+        run: python scripts/run_eda.py
+
+      - name: Upload EDA Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: eda-report
+          path: eda_reports/
