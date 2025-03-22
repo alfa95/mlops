@@ -1,10 +1,12 @@
-name: Auto EDA Pipeline
+name: Feature Engineering Pipeline
 
 on:
-  workflow_dispatch:  # Only runs when manually triggered from GitHub Actions
+  push:
+    branches:
+      - main  # Runs feature engineering on any push to main
 
 jobs:
-  run-eda:
+  run-feature-engineering:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,12 +31,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run EDA Script
-        run: python scripts/run_eda.py
-
-      - name: Upload EDA Report as Artifact
-        uses: actions/upload-artifact@v4
+      - name: Download EDA Report (Optional Debugging)
+        uses: actions/download-artifact@v4
         with:
           name: eda-report
           path: eda_reports/
-          if-no-files-found: error  # Fail if no reports are found
+
+      - name: Run Feature Engineering
+        run: python scripts/feature_engineering.py
+
+      - name: Upload Processed Data & Model as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-data-and-model
+          path: |
+            models/
+            processed_data/
+          if-no-files-found: error  # Fail if no files are found

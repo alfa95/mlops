@@ -6,3 +6,4 @@ seaborn
 matplotlib
 scikit-learn
 pandas-profiling
+shap
