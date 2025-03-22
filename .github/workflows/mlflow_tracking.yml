@@ -1,10 +1,12 @@
-name: Model Selection Pipeline
+name: MLflow Model Tracking & Drift Detection
 
 on:
-  workflow_dispatch:  # Allow manual trigger only
+  push:
+    branches:
+      - main  # Runs feature engineering on any push to main
 
 jobs:
-  run-model-selection:
+  mlflow-tracking:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,12 +31,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Model Selection
-        run: python scripts/model_selection.py
+      - name: Run MLflow Model Training & Drift Detection
+        run: python scripts/mlflow_tracking.py
 
-      - name: Upload Trained Model
+      - name: Upload MLflow Logs & Model Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: trained-model
-          path: models/final_xgb_model.pkl
-          if-no-files-found: error  # Fail if model is missing
+          name: mlflow-logs
+          path: mlruns/
+          if-no-files-found: error  # Fail if logs are missing
