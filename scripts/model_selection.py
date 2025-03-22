@@ -7,6 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 from tensorflow.keras.datasets import fashion_mnist
+import os
+import joblib
+import matplotlib.pyplot as plt
 
 # =======================
 # Load & Preprocess Data
@@ -51,15 +54,9 @@ print("Baseline Model Accuracy:", baseline_accuracy)
 # Hyperparameter Optimization with Optuna
 # =======================
 
-def objective(trial):
+def objective(trial, X_train, X_val, y_train, y_val):
     """
     Objective function for Optuna hyperparameter tuning.
-
-    Args:
-    trial: Optuna trial object to suggest hyperparameters.
-
-    Returns:
-    accuracy_score: Validation accuracy score for the model with suggested hyperparameters.
     """
     # Suggest hyperparameters for tuning
     n_estimators = trial.suggest_int("n_estimators", 50, 150, step=50)  # Number of trees
@@ -77,7 +74,7 @@ def objective(trial):
 
 # Run Optuna to optimize hyperparameters over 5 trials
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=5)
+study.optimize(lambda trial: objective(trial, X_train, X_val, y_train, y_val), n_trials=5)
 
 # =======================
 # Train Final Model with Optimized Hyperparameters
@@ -89,6 +86,19 @@ best_params = study.best_params
 # Train the final model using the best hyperparameters
 final_model = xgb.XGBClassifier(**best_params, random_state=42, n_jobs=1)
 final_model.fit(X_train, y_train)
+
+# Ensure the models directory exists
+os.makedirs("models", exist_ok=True)
+
+# Save the trained model
+model_path = "models/final_xgb_model.pkl"
+joblib.dump(final_model, model_path)
+
+# Debugging: Check if the model file exists
+if os.path.exists(model_path):
+    print(f"✅ Model saved successfully at {model_path}")
+else:
+    print(f"❌ Model saving failed! File not found at {model_path}")
 
 # Predict on the test set
 y_pred = final_model.predict(X_test)
@@ -108,5 +118,8 @@ explainer = shap.Explainer(final_model, X_train)
 # Compute SHAP values for a small subset of the test data
 shap_values = explainer(X_test[:50])
 
-# Generate a SHAP summary plot to visualize feature importance
-shap.summary_plot(shap_values, X_test[:50])
+# Save SHAP summary plot instead of displaying it
+plt.figure()
+shap.summary_plot(shap_values, X_test[:50], show=False)  # ✅ Disable interactive mode
+plt.savefig("models/shap_summary.png")  # ✅ Save plot as an image
+print("✅ SHAP summary plot saved as models/shap_summary.png")
