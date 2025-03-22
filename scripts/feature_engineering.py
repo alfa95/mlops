@@ -20,7 +20,7 @@ def load_fashion_mnist():
     return X_train, y_train, X_test, y_test
 
 # Feature Engineering: Scaling & PCA
-def preprocess_data(X_train, X_test):
+def preprocess_data(X_train, X_test, y_train, y_test):
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
@@ -32,8 +32,8 @@ def preprocess_data(X_train, X_test):
     # Save processed data
     np.save("processed_data/X_train_pca.npy", X_train_pca)
     np.save("processed_data/X_test_pca.npy", X_test_pca)
-    np.save("processed_data/y_train.npy", y_train)
-    np.save("processed_data/y_test.npy", y_test)
+    np.save("processed_data/y_train.npy", y_train)  # ✅ Now properly passed
+    np.save("processed_data/y_test.npy", y_test)  # ✅ Now properly passed
 
     return X_train_pca, X_test_pca
 
@@ -64,8 +64,8 @@ def main():
     X_train, y_train, X_test, y_test = load_fashion_mnist()
     
     print("Preprocessing data...")
-    X_train_pca, X_test_pca = preprocess_data(X_train, X_test)
-    
+    X_train_pca, X_test_pca = preprocess_data(X_train, X_test, y_train, y_test)  # ✅ Pass y_train, y_test
+
     print("Training model...")
     model = train_model(X_train_pca, y_train)
     
