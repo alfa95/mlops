@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score
 from tensorflow.keras.datasets import fashion_mnist
 
 # =======================
-# 📌 Load & Preprocess Data
+# Load & Preprocess Data
 # =======================
 
 # Load the Fashion MNIST dataset
@@ -26,7 +26,7 @@ X_test = X_test.reshape(X_test.shape[0], -1) / 255.0
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
 # =======================
-# 📌 Feature Scaling
+# Feature Scaling
 # =======================
 
 # Standardize the dataset (mean=0, variance=1) to improve model convergence
@@ -36,7 +36,7 @@ X_val = scaler.transform(X_val)
 X_test = scaler.transform(X_test)
 
 # =======================
-# 📌 Baseline Model Training (XGBoost)
+# Baseline Model Training (XGBoost)
 # =======================
 
 # Train an initial XGBoost model with default hyperparameters
@@ -48,7 +48,7 @@ baseline_accuracy = accuracy_score(y_val, model.predict(X_val))
 print("Baseline Model Accuracy:", baseline_accuracy)
 
 # =======================
-# 📌 Hyperparameter Optimization with Optuna
+# Hyperparameter Optimization with Optuna
 # =======================
 
 def objective(trial):
@@ -80,7 +80,7 @@ study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=5)
 
 # =======================
-# 📌 Train Final Model with Optimized Hyperparameters
+# Train Final Model with Optimized Hyperparameters
 # =======================
 
 # Get the best hyperparameters from Optuna study
@@ -99,7 +99,7 @@ print(f"Final Model Accuracy: {final_accuracy:.4f}")
 print("Best Hyperparameters:", best_params)
 
 # =======================
-# 📌 Explainability with SHAP
+# Explainability with SHAP
 # =======================
 
 # Create a SHAP explainer for feature importance

@@ -7,3 +7,6 @@ matplotlib
 scikit-learn
 pandas-profiling
 shap
+optuna
+xgboost
+joblib
