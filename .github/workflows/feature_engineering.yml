@@ -31,7 +31,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download EDA Report (Optional Debugging)
+      - name: Download EDA Report (Optional)
+        continue-on-error: true  # Allow pipeline to continue if EDA report is missing
         uses: actions/download-artifact@v4
         with:
           name: eda-report
