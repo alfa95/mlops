@@ -1,12 +1,11 @@
+import os
 import mlflow
 import mlflow.keras
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-from sklearn.model_selection import train_test_split
-from river.drift import ADWIN  # ✅ Replaced skmultiflow with river
-import os
+from river.drift import ADWIN  
 import pandas as pd
 import matplotlib.pyplot as plt
 from mlflow.tracking import MlflowClient
@@ -32,7 +31,7 @@ x_test = x_test.reshape(-1, 28, 28, 1)
 mlflow.set_tracking_uri("./mlruns")  
 mlflow.set_experiment("FashionMNIST-Tracking")
 
-# Initialize ADWIN for drift detection across runs
+# Initialize ADWIN for drift detection
 adwin = ADWIN()
 previous_acc = None
 
@@ -80,18 +79,13 @@ for run in range(5):
 # Analyze MLflow Runs
 # ==========================
 
-# Initialize MLflow client
 client = MlflowClient()
-
-# Get Experiment ID
 experiment_name = "FashionMNIST-Tracking"
 experiment = client.get_experiment_by_name(experiment_name)
 experiment_id = experiment.experiment_id
 
-# Fetch all runs from the experiment
 runs = client.search_runs(experiment_id, order_by=["metrics.test_accuracy DESC"])
 
-# Convert to Pandas DataFrame for analysis
 df = pd.DataFrame([{  
     "run_id": run.info.run_id,  
     "test_accuracy": run.data.metrics["test_accuracy"],  
@@ -100,26 +94,27 @@ df = pd.DataFrame([{
     "start_time": run.info.start_time
 } for run in runs])
 
-# Convert start_time to datetime format for better visualization
 df["start_time"] = pd.to_datetime(df["start_time"], unit="ms")
 
-# Display sorted runs (best accuracy first)
 print(df)
 
 # ==========================
 # Compare Runs by Accuracy
 # ==========================
 
-# Sort by test accuracy
 df_sorted = df.sort_values("test_accuracy", ascending=False)
 
-# Plot accuracy comparison
 plt.figure(figsize=(10, 5))
 plt.barh(df_sorted["run_id"], df_sorted["test_accuracy"], color="blue")
 plt.xlabel("Test Accuracy")
 plt.ylabel("Run ID")
 plt.title("Comparison of MLflow Runs by Test Accuracy")
-plt.gca().invert_yaxis()  # Best model at the top
+plt.gca().invert_yaxis()  
+
+# ✅ Ensure the models/ directory exists
+os.makedirs("models", exist_ok=True)
+
+# ✅ Save accuracy comparison plot
 plt.savefig("models/mlflow_accuracy_comparison.png")
 print("✅ Accuracy comparison plot saved as models/mlflow_accuracy_comparison.png")
 
@@ -127,13 +122,8 @@ print("✅ Accuracy comparison plot saved as models/mlflow_accuracy_comparison.p
 # Detect Data Drift
 # ==========================
 
-# Define threshold for significant accuracy drop (e.g., 5% or 0.05)
 accuracy_drop_threshold = 0.05  
-
-# Compute accuracy change between consecutive runs
 df["accuracy_change"] = df["test_accuracy"].diff()
-
-# Identify runs where accuracy drops beyond the threshold
 drift_runs = df[df["accuracy_change"] < -accuracy_drop_threshold]
 
 if not drift_runs.empty:
@@ -154,5 +144,7 @@ plt.ylabel("Test Accuracy")
 plt.title("Accuracy Over Time - Drift Detection")
 plt.legend()
 plt.xticks(rotation=45)
+
+# ✅ Save drift detection plot
 plt.savefig("models/mlflow_drift_detection.png")
 print("✅ Drift detection plot saved as models/mlflow_drift_detection.png")
