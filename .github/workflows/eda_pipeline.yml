@@ -29,8 +29,16 @@ jobs:
       - name: Run EDA Script
         run: python scripts/run_eda.py
 
+      # Debug: Ensure the report directory exists
+      - name: Verify EDA Report Directory
+        run: |
+          echo "Checking if eda_reports directory exists..."
+          ls -R eda_reports/ || echo "No EDA reports found!"
+
+      # Upload EDA Report as an Artifact
       - name: Upload EDA Report as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: eda-report
-          path: eda_reports/
+          path: eda_reports/**/*.html  # Upload only HTML reports
+          if-no-files-found: error  # Fail if reports are missing
