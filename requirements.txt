@@ -12,3 +12,4 @@ xgboost
 joblib
 mlflow
 skmultiflow
+river

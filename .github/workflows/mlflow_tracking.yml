@@ -3,7 +3,7 @@ name: MLflow Model Tracking & Drift Detection
 on:
   push:
     branches:
-      - main  # Runs feature engineering on any push to main
+      - main  # Runs MLflow tracking on any push to main
 
 jobs:
   mlflow-tracking:
@@ -16,7 +16,7 @@ jobs:
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.7"
+          python-version: "3.9"  # ✅ Now supports Python 3.9+
 
       - name: Cache Python Dependencies
         uses: actions/cache@v3
@@ -33,6 +33,11 @@ jobs:
 
       - name: Run MLflow Model Training & Drift Detection
         run: python scripts/mlflow_tracking.py
+
+      - name: Debug MLflow Logs
+        run: |
+          echo "Checking if MLflow logs exist..."
+          ls -R mlruns/ || echo "❌ No MLflow logs found!"
 
       - name: Upload MLflow Logs & Model Artifacts
         uses: actions/upload-artifact@v4
